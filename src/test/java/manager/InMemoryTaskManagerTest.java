@@ -92,7 +92,7 @@ public class InMemoryTaskManagerTest {
 
         SubTask subTask = new SubTask("Test addNewTask", "Test addNewTask description", epic.getId());
         taskManager.createSubTask(subTask);
-        SubTask updatedSubTask = new SubTask(subTask.getId(),"Test 2", "descriptoin", Status.DONE, epic.getId());
+        SubTask updatedSubTask = new SubTask(subTask.getId(), "Test 2", "descriptoin", Status.DONE, epic.getId());
         SubTask actualSubTask = taskManager.updateSubTask(updatedSubTask);
         assertEquals(subTask, actualSubTask, "Не совпадает айди Подзадач");
     }
