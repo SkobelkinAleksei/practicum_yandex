@@ -30,7 +30,7 @@ public class InMemoryHistoryManagerTest {
             taskManager.getTaskById(allTask.getId());
         }
         List<Task> historyTask = taskManager.getHistory();
-        assertEquals(10, historyTask.size(), "Неверное количество элементов");
+        assertEquals(15, historyTask.size(), "Неверное количество элементов");
     }
 
     @Test
@@ -66,7 +66,7 @@ public class InMemoryHistoryManagerTest {
         SubTask subTask = new SubTask("OneSub", "TwoSub", epic.getId());
         taskManager.createSubTask(subTask);
         taskManager.getSubTaskById(subTask.getId());
-        taskManager.updateSubTask(new SubTask(subTask.getId() ,"Two", "Desription", Status.DONE, epic.getId()));
+        taskManager.updateSubTask(new SubTask(subTask.getId(), "Two", "Desription", Status.DONE, epic.getId()));
         List<Task> epicHistory = taskManager.getHistory();
         SubTask firstSubTask = (SubTask) epicHistory.getFirst();
         assertEquals(subTask.getName(), firstSubTask.getName(), "Не сохранилась старая версия задачи");
