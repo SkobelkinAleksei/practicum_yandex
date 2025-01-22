@@ -3,6 +3,9 @@ package org.example;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
@@ -37,12 +40,13 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     public static Task fromString(String value) {
-        String[] keys = {"id", "type", "name", "status", "description", "epicId"};
+        String[] keys = {"id", "type", "name", "status", "description", "startTime", "duration", "epicId"};
         String[] values = value.split(",");
         Map<String, String> params = new LinkedHashMap<>();
 
-        for (int i = 0; i < keys.length; i++) {
-            params.put(keys[i], values[i]);
+        for (int i = 0; i < keys.length && i < value.length(); i++) {
+            String currentValue = (i < values.length) ? values[i] : null;
+            params.put(keys[i], currentValue);
         }
 
         int id = Integer.parseInt(params.get("id"));
@@ -50,14 +54,28 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         String name = params.get("name");
         Status status = Status.valueOf(params.get("status"));
         String description = params.get("description");
-        int epicId = Integer.parseInt(params.get("epicId"));
+        int epicId = 0;
+        LocalDateTime startTime = null;
+        Duration duration = null;
 
-        if (type.equals("TASK")) {
-            return new Task(name, description, status, id);
-        } else if (type.equals("SUBTASK")) {
-            return new SubTask(id, name, description, status, epicId);
+        if (params.containsKey("startTime") && params.get("startTime") != null) {
+            startTime = LocalDateTime.parse(params.get("startTime"), DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+        }
+
+        if (params.containsKey("duration") && params.get("duration") != null) {
+            duration = Duration.parse(params.get("duration"));
+        }
+
+        if (type.equals("SubTask") && params.containsKey("epicId")) {
+            epicId = Integer.parseInt(params.get("epicId"));
+        }
+
+        if (type.equals("Task")) {
+            return new Task(name, description, status, id, duration, startTime);
+        } else if (type.equals("SubTask")) {
+            return new SubTask(name, description, status, id, duration, startTime, epicId);
         } else {
-            return new Epic(name, description, status, id);
+            return new Epic(name, description, status, id, duration, startTime);
         }
 
     }
@@ -70,31 +88,71 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         return "";
     }
 
+//    public void save() {
+//        try (Writer writer = new FileWriter(file)) {
+//            writer.write("id,type,title,status,description,startTime,duration,epic");
+//            HashMap<Integer, String> allTasks = new HashMap<>();
+//
+//            Map<Integer, Task> tasks = super.getTasks();
+//            for (Integer id : tasks.keySet()) {
+//                allTasks.put(id, tasks.get(id).toString());
+//            }
+//
+//            Map<Integer, Epic> epics = super.getEpics();
+//            for (Integer id : epics.keySet()) {
+//                allTasks.put(id, epics.get(id).toString());
+//            }
+//
+//            Map<Integer, SubTask> subtasks = super.getSubTasks();
+//            for (Integer id : subtasks.keySet()) {
+//                allTasks.put(id, subtasks.get(id).toString());
+//            }
+//
+//            for (String value : allTasks.values()) {
+//                writer.write(String.format("%s\n", value));
+//            }
+//            writer.write("\n");
+//
+//            for (Task task : super.getHistory()) {
+//                writer.write(task.getId() + ",");
+//            }
+//
+//        } catch (IOException exception) {
+//            throw new ManagerSaveException("Unable to write file");
+//        }
+//    }
+
     public void save() {
         try (Writer writer = new FileWriter(file)) {
-            writer.write("id,type,title,status,description,startTime,duration,epic");
-            HashMap<Integer, String> allTasks = new HashMap<>();
+            // Первая строка заголовка
+            writer.write("id,type,title,status,description,startTime,duration,epicId\n");
 
+            // Используем TreeMap для сортировки по ключам
+            Map<Integer, String> allTasks = new TreeMap<>();
+
+            // Сохраняем задачи в allTasks, убирая кавычки из строк
             Map<Integer, Task> tasks = super.getTasks();
             for (Integer id : tasks.keySet()) {
-                allTasks.put(id, tasks.get(id).toString());
+                allTasks.put(id, formatTask(tasks.get(id)));
             }
 
             Map<Integer, Epic> epics = super.getEpics();
             for (Integer id : epics.keySet()) {
-                allTasks.put(id, epics.get(id).toString());
+                allTasks.put(id, formatTask(epics.get(id)));
             }
 
             Map<Integer, SubTask> subtasks = super.getSubTasks();
             for (Integer id : subtasks.keySet()) {
-                allTasks.put(id, subtasks.get(id).toString());
+                allTasks.put(id, formatTask(subtasks.get(id)));
             }
 
+            // Пишем все задачи
             for (String value : allTasks.values()) {
-                writer.write(String.format("%s\n", value));
+                writer.write(value + "\n");
             }
             writer.write("\n");
 
+            // История
             for (Task task : super.getHistory()) {
                 writer.write(task.getId() + ",");
             }
@@ -102,6 +160,21 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         } catch (IOException exception) {
             throw new ManagerSaveException("Unable to write file");
         }
+    }
+
+    // Метод для форматирования задачи без кавычек
+    private String formatTask(Task task) {
+        String epicPart = task instanceof SubTask subTask ? String.valueOf(subTask.getEpicId()) : "";
+        return String.format("%d,%s,%s,%s,%s,%s,%s,%s",
+                task.getId(),
+                task.getClass().getSimpleName(), // Тип задачи
+                task.getName(), // Название без кавычек
+                task.getStatus(),
+                task.getDescription(), // Описание без кавычек
+                task.getStartTime(),
+                task.getDuration(),
+                epicPart // ID эпика для SubTask
+        );
     }
 
     public static FileBackedTaskManager loadFromFile(File file) {
@@ -126,11 +199,15 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 // Конвертируем строку в задачу
                 Task task = fromString(line);
 
+//                String type = line.split(",")[1];
+
                 // Добавляем задачу в соответствующий список
+                if (task instanceof SubTask subTask) {
+                    manager.addSubTask(subTask);
+                }
+
                 if (task instanceof Epic epic) {
                     manager.addEpic(epic);
-                } else if (task instanceof SubTask subTask) {
-                    manager.addSubTask(subTask);
                 } else {
                     manager.addTask(task);
                 }
@@ -163,7 +240,11 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         String[] ids = line.split(",");
         List<Integer> history = new ArrayList<>();
         for (String id : ids) {
-            history.add(Integer.parseInt(id.trim()));
+            try {
+                history.add(Integer.parseInt(id.trim())); // Преобразуем только валидные числа
+            } catch (NumberFormatException e) {
+                // Пропускаем невалидные числа
+            }
         }
         return history;
     }
