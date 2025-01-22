@@ -11,9 +11,7 @@ public class InMemoryTaskManager implements TaskManager {
     protected final InMemoryHistoryManagerImpl historyManager = new InMemoryHistoryManagerImpl();
     protected final Set<Task> prioritiTasks = new TreeSet<>(Comparator.comparing(Task::getStartTime)); // Использование TreeSet для хранения задач в порядке приоритета
 
-
     protected int nexId = 1;
-
 
     @Override
     public ArrayList<Task> getAllTasks() {

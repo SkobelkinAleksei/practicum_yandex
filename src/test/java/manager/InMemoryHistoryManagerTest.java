@@ -84,6 +84,4 @@ public class InMemoryHistoryManagerTest {
         assertNotNull(history, "История не пустая.");
         assertEquals(1, history.size(), "История не пустая.");
     }
-
-
 }

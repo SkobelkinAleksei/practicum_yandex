@@ -14,7 +14,5 @@ public enum TaskType {
     public String getTypeName() {
         return typeName;
     }
-
-
 }
 

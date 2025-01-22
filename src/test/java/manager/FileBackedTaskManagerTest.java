@@ -23,7 +23,6 @@ public class FileBackedTaskManagerTest extends TaskManagerTest<InMemoryTaskManag
     FileBackedTaskManager taskManager;
     private static final String filePath = "src/main/resources/test_tasks.csv";
 
-
     @BeforeEach
     public void init() {
         file = new File(filePath);
@@ -51,7 +50,6 @@ public class FileBackedTaskManagerTest extends TaskManagerTest<InMemoryTaskManag
         Assertions.assertTrue(taskManager.getAllEpics().isEmpty());
         Assertions.assertTrue(taskManager.getAllSubTasks().isEmpty());
     }
-
 
     @Test
     public void loadFromFileEpicTest() {
@@ -83,7 +81,6 @@ public class FileBackedTaskManagerTest extends TaskManagerTest<InMemoryTaskManag
         assertEquals(1, loadedManager.getAllSubTasks().size(), "Должна быть загружена одна подзадача.");
         assertEquals(1, epic.getSubTaskList().size(), "Должна быть загружена одна подзадача.");
     }
-
 
     @Override
     protected InMemoryTaskManager createTaskManager() {

@@ -32,7 +32,6 @@ public class SubTask extends Task {
         return TaskType.SUBTASK;
     }
 
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
