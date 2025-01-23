@@ -11,6 +11,8 @@ import java.util.*;
 public class FileBackedTaskManager extends InMemoryTaskManager {
 
     private static final String CSV_FILE = "id,type,name,status,description,epic";
+    private static String[] keys = {"id", "type", "name", "status", "description", "startTime", "duration", "epicId"};
+
     private File file;
 
 
@@ -40,7 +42,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     public static Task fromString(String value) {
-        String[] keys = {"id", "type", "name", "status", "description", "startTime", "duration", "epicId"};
         String[] values = value.split(",");
         Map<String, String> params = new LinkedHashMap<>();
 
@@ -87,40 +88,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
         return "";
     }
-
-//    public void save() {
-//        try (Writer writer = new FileWriter(file)) {
-//            writer.write("id,type,title,status,description,startTime,duration,epic");
-//            HashMap<Integer, String> allTasks = new HashMap<>();
-//
-//            Map<Integer, Task> tasks = super.getTasks();
-//            for (Integer id : tasks.keySet()) {
-//                allTasks.put(id, tasks.get(id).toString());
-//            }
-//
-//            Map<Integer, Epic> epics = super.getEpics();
-//            for (Integer id : epics.keySet()) {
-//                allTasks.put(id, epics.get(id).toString());
-//            }
-//
-//            Map<Integer, SubTask> subtasks = super.getSubTasks();
-//            for (Integer id : subtasks.keySet()) {
-//                allTasks.put(id, subtasks.get(id).toString());
-//            }
-//
-//            for (String value : allTasks.values()) {
-//                writer.write(String.format("%s\n", value));
-//            }
-//            writer.write("\n");
-//
-//            for (Task task : super.getHistory()) {
-//                writer.write(task.getId() + ",");
-//            }
-//
-//        } catch (IOException exception) {
-//            throw new ManagerSaveException("Unable to write file");
-//        }
-//    }
 
     public void save() {
         try (Writer writer = new FileWriter(file)) {
@@ -198,8 +165,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
                 // Конвертируем строку в задачу
                 Task task = fromString(line);
-
-//                String type = line.split(",")[1];
 
                 // Добавляем задачу в соответствующий список
                 if (task instanceof SubTask subTask) {
