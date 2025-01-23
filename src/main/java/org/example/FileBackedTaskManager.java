@@ -11,7 +11,7 @@ import java.util.*;
 public class FileBackedTaskManager extends InMemoryTaskManager {
 
     private static final String CSV_FILE = "id,type,name,status,description,epic";
-    private static String[] keys = {"id", "type", "name", "status", "description", "startTime", "duration", "epicId"};
+    private static final String[] keys = {"id", "type", "name", "status", "description", "startTime", "duration", "epicId"};
 
     private File file;
 
@@ -43,6 +43,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
     public static Task fromString(String value) {
         String[] values = value.split(",");
+
         Map<String, String> params = new LinkedHashMap<>();
 
         for (int i = 0; i < keys.length && i < value.length(); i++) {
