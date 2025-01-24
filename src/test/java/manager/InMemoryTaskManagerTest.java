@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -21,7 +23,7 @@ public class InMemoryTaskManagerTest {
 
     @Test
     public void addNewTask() {
-        Task task = new Task("Test addNewTask", "Test addNewTask description");
+        Task task = new Task("Task 1", "Description", Status.NEW, 0, Duration.ofHours(2), LocalDateTime.of(2023, 10, 1, 12, 10));
         final Task taskId = taskManager.createTasks(task);
 
         final Task savedTask = taskManager.getTaskById(task.getId());
@@ -39,10 +41,10 @@ public class InMemoryTaskManagerTest {
     @Test
     public void addNewEpicsAndSubTasks() {
 
-        Epic epic = taskManager.createEpics(new Epic("Выучить Английский", "Успеть за пол года"));
-        SubTask subTask = taskManager.createSubTask(new SubTask("Пройти 5 тем", "По учебнику от Галины Семеновны", epic.getId()));
-        SubTask subTask1 = taskManager.createSubTask(new SubTask("Изучить вопросы экзамена", "Спросить у Саши", epic.getId()));
-        SubTask subTask2 = taskManager.createSubTask(new SubTask("Пройти 2 тем", "По учебнику от Семена", epic.getId()));
+        Epic epic = taskManager.createEpics(new Epic("Epic 1", "Epic description", Status.NEW, 1, Duration.ZERO, LocalDateTime.MIN));
+        SubTask subTask = taskManager.createSubTask(new SubTask("Пройти 5 тем", "По учебнику от Галины Семеновны", Status.NEW, 1, Duration.ofHours(2), LocalDateTime.of(2023, 10, 1, 12, 10), epic.getId()));
+        SubTask subTask1 = taskManager.createSubTask(new SubTask("Изучить вопросы экзамена", "Спросить у Саши", Status.NEW, 2, Duration.ofHours(2), LocalDateTime.of(2023, 10, 1, 12, 10), epic.getId()));
+        SubTask subTask2 = taskManager.createSubTask(new SubTask("Пройти 2 тем", "По учебнику от Семена", Status.NEW, 1, Duration.ofHours(2), LocalDateTime.of(2023, 10, 1, 12, 10), epic.getId()));
 
         Epic savedEpic = taskManager.getEpicsById(epic.getId());
         SubTask subTaskById = taskManager.getSubTaskById(subTask.getId());
@@ -69,37 +71,37 @@ public class InMemoryTaskManagerTest {
 
     @Test
     public void updateTask() {
-        Task task = new Task("Test addNewTask", "Test addNewTask description");
+        Task task = new Task("Task 1", "Description", Status.NEW, 1, Duration.ofHours(2), LocalDateTime.of(2023, 10, 1, 12, 10));
         taskManager.createTasks(task);
-        Task updatedTask = new Task("Test 2", "descriptoin", Status.DONE, task.getId());
+        Task updatedTask = new Task("Task 2", "Description", Status.NEW, task.getId(), Duration.ofHours(2), LocalDateTime.of(2023, 10, 1, 12, 10));
         Task actualTask = taskManager.updateTask(updatedTask);
-        assertEquals(task, actualTask, "Не совпадает айди задач");
+        assertEquals(task.getId(), actualTask.getId(), "Не совпадает айди задач");
     }
 
     @Test
     public void updateEpic() {
-        Epic epic = new Epic("Test addNewTask", "Test addNewTask description");
+        Epic epic = new Epic("Epic 1", "Epic description", Status.NEW, 1, Duration.ZERO, LocalDateTime.MIN);
         taskManager.createEpics(epic);
-        Epic updatedEpic = new Epic("Test 2", "descriptoin", Status.DONE, epic.getId());
+        Epic updatedEpic = new Epic("Test 2", "descriptoin", Status.DONE, epic.getId(), Duration.ZERO, LocalDateTime.MIN);
         Epic actualEpic = taskManager.updateEpic(updatedEpic);
-        assertEquals(epic, actualEpic, "Не совпадает айди Эпиков");
+        assertEquals(epic.getId(), actualEpic.getId(), "Не совпадает айди Эпиков");
     }
 
     @Test
     public void updateSubTask() {
-        Epic epic = new Epic("Выучить Английский", "Успеть за пол года");
+        Epic epic = new Epic("Выучить Английский", "Успеть за пол года", Status.NEW, 1, Duration.ZERO, LocalDateTime.MIN);
         taskManager.createEpics(epic);
 
-        SubTask subTask = new SubTask("Test addNewTask", "Test addNewTask description", epic.getId());
+        SubTask subTask = new SubTask("SubTask 1", "Description", Status.NEW, 0, Duration.ofHours(2), LocalDateTime.of(2023, 10, 1, 12, 10), epic.getId());
         taskManager.createSubTask(subTask);
-        SubTask updatedSubTask = new SubTask(subTask.getId(), "Test 2", "descriptoin", Status.DONE, epic.getId());
+        SubTask updatedSubTask = new SubTask("Test 2", "descriptoin", Status.DONE, subTask.getId(), Duration.ofHours(2), LocalDateTime.of(2023, 10, 1, 12, 10), epic.getId());
         SubTask actualSubTask = taskManager.updateSubTask(updatedSubTask);
-        assertEquals(subTask, actualSubTask, "Не совпадает айди Подзадач");
+        assertEquals(subTask.getId(), actualSubTask.getId(), "Не совпадает айди Подзадач");
     }
 
     @Test
     public void deleteTasks() {
-        Task task = new Task("Test addNewTask", "Test addNewTask description");
+        Task task = new Task("Task 1", "Description", Status.NEW, 1, Duration.ofHours(2), LocalDateTime.of(2023, 10, 1, 12, 10));
         taskManager.createTasks(task);
         taskManager.deleteTasks();
         assertTrue(taskManager.getAllTasks().isEmpty(), "Список задач должен быть пуст");
@@ -107,7 +109,7 @@ public class InMemoryTaskManagerTest {
 
     @Test
     public void deleteEpics() {
-        Epic epic = new Epic("Test addNewTask", "Test addNewTask description");
+        Epic epic = new Epic("Выучить Английский", "Успеть за пол года", Status.NEW, 1, Duration.ZERO, LocalDateTime.MIN);
         taskManager.createEpics(epic);
         taskManager.deleteEpics();
         assertTrue(taskManager.getAllEpics().isEmpty(), "Список Эпиков должен быть пуст");
@@ -116,10 +118,10 @@ public class InMemoryTaskManagerTest {
     @Test
     public void deleteSubTasks() {
 
-        Epic epic = new Epic("Test addNewTask", "Test addNewTask description");
+        Epic epic = new Epic("Выучить Английский", "Успеть за пол года", Status.NEW, 1, Duration.ZERO, LocalDateTime.MIN);
         taskManager.createEpics(epic);
 
-        SubTask subTask = new SubTask("Test addNewTask", "Test addNewTask description", epic.getId());
+        SubTask subTask = new SubTask("SubTask 1", "Description", Status.NEW, 0, Duration.ofHours(2), LocalDateTime.of(2023, 10, 1, 12, 10), epic.getId());
         taskManager.createSubTask(subTask);
         taskManager.deleteSubTasks();
         assertTrue(taskManager.getAllSubTasks().isEmpty(), "Список подзадач должен быть пуст");
@@ -127,8 +129,8 @@ public class InMemoryTaskManagerTest {
 
     @Test
     public void createdTaskAndGenerateTaskShouldNotConflicts() {
-        Task task1 = new Task("Test NewTask", "NewTask description", Status.NEW, 1);
-        Task task2 = new Task("Test NewTask", "NewTask description");
+        Task task1 = new Task("Task 1", "Description", Status.NEW, 1, Duration.ofHours(2), LocalDateTime.of(2023, 10, 1, 12, 10));
+        Task task2 = new Task("Task 2", "Description", Status.NEW, 2, Duration.ofHours(2), LocalDateTime.of(2023, 10, 2, 12, 10));
         taskManager.createTasks(task1);
         taskManager.createTasks(task2);
         assertNotEquals(task1.getId(), task2.getId(), "ID должны быть уникальные");
@@ -139,8 +141,8 @@ public class InMemoryTaskManagerTest {
 
     @Test
     public void deleteTaskById() {
-        Task task1 = new Task("Test NewTask", "NewTask description");
-        Task task2 = new Task("Test NewTask2", "NewTask description2");
+        Task task1 = new Task("Task 1", "Description", Status.NEW, 1, Duration.ofHours(2), LocalDateTime.of(2023, 10, 1, 12, 10));
+        Task task2 = new Task("Task 2", "Description", Status.NEW, 2, Duration.ofHours(2), LocalDateTime.of(2023, 10, 2, 12, 10));
         taskManager.createTasks(task1);
         taskManager.createTasks(task2);
         assertFalse(taskManager.deleteTaskById(3), "Ключа нет в списке");
@@ -149,8 +151,8 @@ public class InMemoryTaskManagerTest {
 
     @Test
     public void deleteEpicById() {
-        Epic epic1 = new Epic("Test NewTask", "NewTask description");
-        Epic epic2 = new Epic("Test NewTask2", "NewTask description2");
+        Epic epic1 = new Epic("Выучить Английский", "Успеть за пол года", Status.NEW, 1, Duration.ZERO, LocalDateTime.MIN);
+        Epic epic2 = new Epic("Выучить Английский", "Успеть за пол года", Status.NEW, 2, Duration.ZERO, LocalDateTime.MIN);
         taskManager.createEpics(epic1);
         taskManager.createEpics(epic2);
         assertFalse(taskManager.deleteEpicById(3), "Ключа нет в списке");
@@ -160,10 +162,10 @@ public class InMemoryTaskManagerTest {
     @Test
     public void deleteSubTaskById() {
 
-        Epic epic = new Epic("Test NewTask", "NewTask description");
+        Epic epic = new Epic("Выучить Английский", "Успеть за пол года", Status.NEW, 1, Duration.ZERO, LocalDateTime.MIN);
         taskManager.createEpics(epic);
-        SubTask subTask1 = new SubTask("Test NewSubTask", "NewSubTask description", epic.getId());
-        SubTask subTask2 = new SubTask("Test NewSubTask2", "NewSubTask2 description", epic.getId());
+        SubTask subTask1 = new SubTask("SubTask 1", "Description", Status.NEW, 0, Duration.ofHours(2), LocalDateTime.of(2023, 10, 1, 12, 10), epic.getId());
+        SubTask subTask2 = new SubTask("SubTask 1", "Description", Status.NEW, 1, Duration.ofHours(2), LocalDateTime.of(2023, 10, 1, 12, 10), epic.getId());
         taskManager.createSubTask(subTask1);
         taskManager.createSubTask(subTask2);
         assertFalse(taskManager.deleteSubTaskById(4), "Ключа нет в списке");
