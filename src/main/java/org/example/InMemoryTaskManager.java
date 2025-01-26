@@ -1,9 +1,7 @@
 package org.example;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
 
 public class InMemoryTaskManager implements TaskManager {
 
@@ -11,10 +9,9 @@ public class InMemoryTaskManager implements TaskManager {
     protected final Map<Integer, SubTask> subTasks = new HashMap<>();
     protected final Map<Integer, Epic> epics = new HashMap<>();
     protected final InMemoryHistoryManagerImpl historyManager = new InMemoryHistoryManagerImpl();
-
+    protected final Set<Task> prioritiTasks = new TreeSet<>(Comparator.comparing(Task::getStartTime)); // Использование TreeSet для хранения задач в порядке приоритета
 
     protected int nexId = 1;
-
 
     @Override
     public ArrayList<Task> getAllTasks() {
@@ -68,25 +65,50 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public Task createTasks(Task task) {
+        validateTask(task); // Валидация задачи перед добавлением
         task.setId(getNexId());
         tasks.put(task.getId(), task);
+        prioritiTasks.add(task); // Добавление задачи в отсортированный список
         return task;
     }
 
     @Override
     public Epic createEpics(Epic epic) {
+        validateTask(epic); // Валидация задачи перед добавлением
         epic.setId(getNexId());
         epics.put(epic.getId(), epic);
+        prioritiTasks.add(epic);// Добавление задачи в отсортированный список
         return epic;
     }
 
     @Override
     public SubTask createSubTask(SubTask subTask) {
+        validateTask(subTask);
         subTask.setId((getNexId()));
         Epic epic = epics.get(subTask.getEpicId());
         epic.addSubTask(subTask);
         subTasks.put(subTask.getId(), subTask);
+        prioritiTasks.add(subTask);
         return subTask;
+    }
+
+    // Метод для проверки пересечений задач
+    private void validateTask(Task task) {
+        if (task instanceof Epic) {
+            return;
+        }
+
+        if (task.getStartTime() != null  // проверили, что установили время
+                && prioritiTasks.stream()
+                .filter(existingTask -> !(existingTask instanceof Epic))
+                .anyMatch(existingTask -> existingTask.overlapsWith(task))) {  // вернет тру, если задачи пересекаются
+            throw new ManagerSaveException("Задачи пересекаются по времени.");
+        }
+    }
+
+    // Получение задач в порядке приоритета
+    public List<Task> getPrioritiTasks() {
+        return new ArrayList<>(prioritiTasks);
     }
 
     @Override

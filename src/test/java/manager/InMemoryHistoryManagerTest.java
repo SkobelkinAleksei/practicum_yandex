@@ -4,6 +4,8 @@ import org.example.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,8 +24,10 @@ public class InMemoryHistoryManagerTest {
 
     @Test
     public void getHistoryLastOf10Tasks() {
+        int counter = 1;
+
         for (int i = 0; i < 15; i++) {
-            taskManager.createTasks(new Task("Name", "description"));
+            taskManager.createTasks(new Task("Name", "description", Status.NEW, 1, Duration.ofHours(2), LocalDateTime.of(2023, 10, counter++, 15, 10)));
         }
         ArrayList<Task> allTasks = taskManager.getAllTasks();
         for (Task allTask : allTasks) {
@@ -35,10 +39,10 @@ public class InMemoryHistoryManagerTest {
 
     @Test
     public void getHistoryShouldReturnOldTaskAfterUpdate() {
-        Task task = new Task("One", "Desription");
+        Task task = new Task("One", "Desription", Status.NEW, 1, Duration.ofHours(2), LocalDateTime.of(2023, 10, 1, 12, 10));
         taskManager.createTasks(task);
         taskManager.getTaskById(task.getId());
-        taskManager.updateTask(new Task("Two", "Desription", Status.DONE, task.getId()));
+        taskManager.updateTask(new Task("Two", "Desription", Status.DONE, task.getId(), Duration.ofHours(2), LocalDateTime.of(2023, 10, 1, 12, 10)));
         List<Task> taskHistory = taskManager.getHistory();
         Task firstTask = taskHistory.getFirst();
         assertEquals(task.getName(), firstTask.getName(), "Не сохранилась старая версия задачи");
@@ -47,10 +51,10 @@ public class InMemoryHistoryManagerTest {
 
     @Test
     public void getHistoryShouldReturnOldEpicAfterUpdate() {
-        Epic epic = new Epic("One", "Desription");
+        Epic epic = new Epic("Epic 1", "Epic description", Status.NEW, 1, Duration.ZERO, LocalDateTime.MIN);
         taskManager.createEpics(epic);
         taskManager.getEpicsById(epic.getId());
-        taskManager.updateEpic(new Epic("Two", "Desription", Status.DONE, epic.getId()));
+        taskManager.updateEpic(new Epic("Two", "Desription", Status.DONE, epic.getId(), Duration.ZERO, LocalDateTime.MIN));
         List<Task> epicHistory = taskManager.getHistory();
         Epic firstEpic = (Epic) epicHistory.getFirst();
         assertEquals(epic.getName(), firstEpic.getName(), "Не сохранилась старая версия задачи");
@@ -60,13 +64,13 @@ public class InMemoryHistoryManagerTest {
 
     @Test
     public void getHistoryShouldReturnOldSubTaskAfterUpdate() {
-        Epic epic = new Epic("One", "Desription");
+        Epic epic = new Epic("Epic 1", "Epic description", Status.NEW, 1, Duration.ZERO, LocalDateTime.MIN);
         taskManager.createEpics(epic);
 
-        SubTask subTask = new SubTask("OneSub", "TwoSub", epic.getId());
+        SubTask subTask = new SubTask("SubTask 1", "Description", Status.NEW, 0, Duration.ofHours(2), LocalDateTime.of(2023, 10, 1, 12, 10), epic.getId());
         taskManager.createSubTask(subTask);
         taskManager.getSubTaskById(subTask.getId());
-        taskManager.updateSubTask(new SubTask(subTask.getId(), "Two", "Desription", Status.DONE, epic.getId()));
+        taskManager.updateSubTask(new SubTask("SubTask 1", "Description", Status.NEW, 0, Duration.ofHours(2), LocalDateTime.of(2023, 10, 1, 12, 10), epic.getId()));
         List<Task> epicHistory = taskManager.getHistory();
         SubTask firstSubTask = (SubTask) epicHistory.getFirst();
         assertEquals(subTask.getName(), firstSubTask.getName(), "Не сохранилась старая версия задачи");
@@ -77,13 +81,11 @@ public class InMemoryHistoryManagerTest {
     @Test
     void add() {
 
-        Task task = new Task("One", "Desription");
+        Task task = new Task("One", "Desription", Status.NEW, 1, Duration.ofHours(2), LocalDateTime.of(2023, 10, 1, 12, 10));
         taskManager.createTasks(task);
         historyManager.add(task);
         final List<Task> history = historyManager.getHistory();
         assertNotNull(history, "История не пустая.");
         assertEquals(1, history.size(), "История не пустая.");
     }
-
-
 }
