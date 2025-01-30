@@ -38,7 +38,7 @@ public class TaskHandler extends BaseHttpHandler implements HttpHandler {
         try {
             Task task = HttpTaskServer.gson.fromJson(new InputStreamReader(exchange.getRequestBody()), Task.class);
             HttpTaskServer.taskManager.createTasks(task);
-            sendText(exchange, "{\"message\":\"Task created successfully\"}");
+            sendText(exchange, "{\"message\":\"Task добавлен успешно\"}");
             exchange.sendResponseHeaders(HttpURLConnection.HTTP_CREATED, -1);
         } catch (Exception e) {
             sendInternalServerError(exchange, e.getMessage());
@@ -50,7 +50,7 @@ public class TaskHandler extends BaseHttpHandler implements HttpHandler {
         if (query != null && query.startsWith("id=")) {
             int id = Integer.parseInt(query.split("=")[1]);
             HttpTaskServer.taskManager.deleteTaskById(id);
-            sendText(exchange, "{\"message\":\"Task deleted successfully\"}");
+            sendText(exchange, "{\"message\":\"Task удален успешно\"}");
         } else {
             sendNotFound(exchange);
         }

@@ -21,7 +21,7 @@ public class Main {
                 .registerTypeAdapter(Duration.class, new DurationTypeAdapter())
                 .create();
 
-        // Пример сериализации и десериализации
+
         Task task = new Task("Test Task", "This is a test task", Status.NEW, 1, Duration.ofHours(4), LocalDateTime.of(2023, 10, 1, 12, 10));
 
         // Сериализация

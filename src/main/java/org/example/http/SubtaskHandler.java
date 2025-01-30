@@ -28,6 +28,7 @@ public class SubtaskHandler extends BaseHttpHandler implements HttpHandler {
 
     private void handleGetSubtasks(HttpExchange exchange) throws IOException {
         List<SubTask> subtasks = HttpTaskServer.taskManager.getAllSubTasks();
+        System.out.println(subtasks);
         String jsonResponse = HttpTaskServer.gson.toJson(subtasks);
         sendText(exchange, jsonResponse);
     }
@@ -35,7 +36,7 @@ public class SubtaskHandler extends BaseHttpHandler implements HttpHandler {
     private void handleCreateSubtask(HttpExchange exchange) throws IOException {
         SubTask subtask = HttpTaskServer.gson.fromJson(new InputStreamReader(exchange.getRequestBody()), SubTask.class);
         HttpTaskServer.taskManager.createSubTask(subtask);
-        sendText(exchange, "{\"message\":\"Subtask created successfully\"}");
+        sendText(exchange, "{\"message\":\"Subtask добавлен успешно\"}");
     }
 
     private void handleDeleteSubtask(HttpExchange exchange) throws IOException {
@@ -43,7 +44,7 @@ public class SubtaskHandler extends BaseHttpHandler implements HttpHandler {
         if (query != null && query.startsWith("id=")) {
             int id = Integer.parseInt(query.split("=")[1]);
             HttpTaskServer.taskManager.deleteSubTaskById(id);
-            sendText(exchange, "{\"message\":\"Subtask deleted successfully\"}");
+            sendText(exchange, "{\"message\":\"Subtask удален успешно\"}");
         } else {
             sendNotFound(exchange);
         }

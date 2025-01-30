@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.List;
 
 public class HistoryHandler extends BaseHttpHandler implements HttpHandler {
+
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         if ("GET".equals(exchange.getRequestMethod())) {
@@ -15,7 +16,7 @@ public class HistoryHandler extends BaseHttpHandler implements HttpHandler {
             String jsonResponse = HttpTaskServer.gson.toJson(history);
             sendText(exchange, jsonResponse);
         } else {
-            sendText(exchange, "Method Not Allowed");
+            sendText(exchange, "Дело плохо, что-то не правильно HistoryHandler");
         }
     }
 }

@@ -1,8 +1,7 @@
-package test8;
+package HandlerTest;
 
 import org.example.Status;
 import org.example.Task;
-import org.example.TaskType;
 import org.example.http.HttpTaskServer;
 import org.example.InMemoryTaskManager;
 import org.example.TaskManager;
@@ -26,16 +25,11 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class HttpTaskManagerTasksTest {
+public class HttpTaskManagerTest {
 
     TaskManager manager;
     HttpTaskServer taskServer;
     Gson gson;
-
-    public HttpTaskManagerTasksTest() {
-
-    }
-
 
     @BeforeEach
     public void setUp() {
@@ -65,6 +59,7 @@ public class HttpTaskManagerTasksTest {
         assertEquals(200, response.statusCode());
 
         List<Task> tasksFromManager = manager.getAllTasks();
+        System.out.println(tasksFromManager);
 
         assertNotNull(tasksFromManager, "Задачи не возвращаются");
         assertEquals(1, tasksFromManager.size(), "Некорректное количество задач");

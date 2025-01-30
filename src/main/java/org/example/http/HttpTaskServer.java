@@ -40,7 +40,7 @@ public class HttpTaskServer {
             server.createContext("/subtasks", new SubtaskHandler());
             server.createContext("/epics", new EpicHandler());
             server.createContext("/history", new HistoryHandler());
-            server.createContext("/prioritized", new PrioritiHandler());
+            server.createContext("/prioriti", new PrioritiHandler());
 
             server.setExecutor(null);
             server.start();

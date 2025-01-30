@@ -37,7 +37,7 @@ public class EpicHandler extends BaseHttpHandler implements HttpHandler {
     private void handleCreateEpic(HttpExchange exchange) throws IOException {
         Epic epic = HttpTaskServer.gson.fromJson(new InputStreamReader(exchange.getRequestBody()), Epic.class);
         HttpTaskServer.taskManager.createEpics(epic);
-        sendText(exchange, "{\"message\":\"Epic created successfully\"}");
+        sendText(exchange, "{\"message\":\"Эпик создан успешно\"}");
     }
 
     private void handleDeleteEpic(HttpExchange exchange) throws IOException {
@@ -45,9 +45,10 @@ public class EpicHandler extends BaseHttpHandler implements HttpHandler {
         if (query != null && query.startsWith("id=")) {
             int id = Integer.parseInt(query.split("=")[1]);
             HttpTaskServer.taskManager.deleteEpicById(id);
-            sendText(exchange, "{\"message\":\"Epic deleted successfully\"}");
+            sendText(exchange, "{\"message\":\"Эпик удален успешно\"}");
         } else {
             sendNotFound(exchange);
         }
     }
+
 }

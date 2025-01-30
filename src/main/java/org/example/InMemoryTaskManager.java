@@ -69,6 +69,7 @@ public class InMemoryTaskManager implements TaskManager {
         validateTask(task); // Валидация задачи перед добавлением
         task.setId(getNexId());
         tasks.put(task.getId(), task);
+        historyManager.add(task);
         prioritiTasks.add(task); // Добавление задачи в отсортированный список
         return task;
     }
@@ -78,6 +79,7 @@ public class InMemoryTaskManager implements TaskManager {
         validateTask(epic); // Валидация задачи перед добавлением
         epic.setId(getNexId());
         epics.put(epic.getId(), epic);
+        historyManager.add(epic);
         prioritiTasks.add(epic);// Добавление задачи в отсортированный список
         return epic;
     }
